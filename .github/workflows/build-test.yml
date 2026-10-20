@@ -1,0 +1,20 @@
+name: Add-on bauen
+on: [push, workflow_dispatch]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        arch: [amd64, aarch64]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-qemu-action@v3
+      - name: Bauen
+        run: |
+          plat=$([ "${{ matrix.arch }}" = amd64 ] && echo linux/amd64 || echo linux/arm64)
+          docker build --platform $plat --build-arg BUILD_FROM=ghcr.io/home-assistant/${{ matrix.arch }}-base:3.20 -t kb klivox-bridge
+      - name: Prüfen
+        run: |
+          plat=$([ "${{ matrix.arch }}" = amd64 ] && echo linux/amd64 || echo linux/arm64)
+          docker run --rm --platform $plat --entrypoint python3 kb -c "import requests, cryptography; import zeroconf; print('Pakete ok')"
+          docker run --rm --platform $plat --entrypoint python3 kb /opt/klivox-bridge/klivox-bridge.py status
