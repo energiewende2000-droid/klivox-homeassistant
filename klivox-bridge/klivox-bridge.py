@@ -21,7 +21,7 @@ except ImportError:  # pragma: no cover
     print("Bitte zuerst installieren: sudo apt install python3-requests python3-cryptography")
     sys.exit(1)
 
-VERSION = "1.0.2"
+VERSION = "1.0.3"
 CLOUD = os.environ.get("KLIVOX_CLOUD", "https://cloud.klivox.de")
 HOME = os.environ.get("KLIVOX_BRIDGE_HOME", os.path.expanduser("~/.klivox-bridge"))
 CONF = os.path.join(HOME, "config.json")
@@ -201,7 +201,8 @@ class Bosch:
                 target["RoomClimateControl"] = rcc
             self.devices[did] = {"target": target, "roomId": d.get("roomId")}
             out.append({"id": did, "name": d.get("name") or did, "room": rooms.get(d.get("roomId"), ""), "type": d.get("deviceModel", ""),
-                        "online": d.get("status", "AVAILABLE") == "AVAILABLE", "services": services})
+                        "online": d.get("status", "AVAILABLE") not in ("UNAVAILABLE", "COMMUNICATION_ERROR"),
+                        "status": d.get("status", ""), "services": services})
         return out
 
     def command(self, device, service, prop, value):

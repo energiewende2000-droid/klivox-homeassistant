@@ -1,3 +1,6 @@
+## 1.0.3
+- Bosch: Gerätestatus des Controllers wird mitgeschickt; nur echte Störungen zählen als „offline“.
+
 ## 1.0.2
 - Verständliche Meldung, wenn der Controller nicht im Kopplungsmodus ist.
 
