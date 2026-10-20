@@ -1,5 +1,5 @@
 name: Klivox-Brücke
-version: "1.0.0"
+version: "1.0.1"
 slug: klivox_bridge
 description: Verbindet lokale Geräte (z. B. Bosch Smart Home Controller) mit der Klivox Cloud – nur ausgehende Verbindungen, keine Portfreigabe nötig.
 url: https://cloud.klivox.de/bruecke.php

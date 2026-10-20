@@ -21,7 +21,7 @@ except ImportError:  # pragma: no cover
     print("Bitte zuerst installieren: sudo apt install python3-requests python3-cryptography")
     sys.exit(1)
 
-VERSION = "1.0.0"
+VERSION = "1.0.1"
 CLOUD = os.environ.get("KLIVOX_CLOUD", "https://cloud.klivox.de")
 HOME = os.environ.get("KLIVOX_BRIDGE_HOME", os.path.expanduser("~/.klivox-bridge"))
 CONF = os.path.join(HOME, "config.json")
@@ -155,8 +155,12 @@ class Bosch:
         cp, kp, pem = make_cert(HOME)
         body = {"@type": "client", "id": "oss_klivox_" + uuid.uuid4().hex[:8], "name": "OSS Klivox Bridge",
                 "primaryRole": "ROLE_RESTRICTED_CLIENT", "certificate": pem}
-        r = requests.post("https://%s:8443/smarthome/clients" % ip, json=body, verify=False, timeout=20,
-                          headers={"Systempassword": base64.b64encode(password.encode()).decode(), "api-version": "3.2"})
+        hdr = {"Systempassword": base64.b64encode(password.encode()).decode(), "api-version": "3.2"}
+        url = "https://%s:8443/smarthome/clients" % ip
+        try:  # neuere Controller verlangen das Client-Zertifikat schon beim Verbindungsaufbau
+            r = requests.post(url, json=body, verify=False, timeout=20, headers=hdr, cert=(cp, kp))
+        except requests.exceptions.SSLError:
+            r = requests.post(url, json=body, verify=False, timeout=20, headers=hdr)
         if r.status_code == 401:
             raise RuntimeError("Systempasswort falsch.")
         if r.status_code >= 300:
