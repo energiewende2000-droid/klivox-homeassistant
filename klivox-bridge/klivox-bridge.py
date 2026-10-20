@@ -21,7 +21,7 @@ except ImportError:  # pragma: no cover
     print("Bitte zuerst installieren: sudo apt install python3-requests python3-cryptography")
     sys.exit(1)
 
-VERSION = "1.0.1"
+VERSION = "1.0.2"
 CLOUD = os.environ.get("KLIVOX_CLOUD", "https://cloud.klivox.de")
 HOME = os.environ.get("KLIVOX_BRIDGE_HOME", os.path.expanduser("~/.klivox-bridge"))
 CONF = os.path.join(HOME, "config.json")
@@ -160,7 +160,11 @@ class Bosch:
         try:  # neuere Controller verlangen das Client-Zertifikat schon beim Verbindungsaufbau
             r = requests.post(url, json=body, verify=False, timeout=20, headers=hdr, cert=(cp, kp))
         except requests.exceptions.SSLError:
-            r = requests.post(url, json=body, verify=False, timeout=20, headers=hdr)
+            try:
+                r = requests.post(url, json=body, verify=False, timeout=20, headers=hdr)
+            except requests.exceptions.SSLError:
+                raise RuntimeError("Der Controller ist nicht im Kopplungsmodus. Bitte die Taste vorne am Controller gedrückt halten, "
+                                   "bis die Leuchte blinkt, dann sofort in Klivox auf „Koppeln“ tippen.")
         if r.status_code == 401:
             raise RuntimeError("Systempasswort falsch.")
         if r.status_code >= 300:
